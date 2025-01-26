@@ -44,12 +44,12 @@ class SMFFDTA(nn.Module):
     def se_block(self, channels):
         se_block = nn.Sequential(
             nn.AdaptiveAvgPool1d(1),  
-            View((-1, channels)),     # 将形状调整为 (batch_size, channels)
+            View((-1, channels)),     
             nn.Linear(channels, channels // 16, bias=False), 
             nn.ReLU(),              
             nn.Linear(channels // 16, channels, bias=False), 
             nn.Sigmoid(),            
-            View((-1, channels, 1))   # 将形状调整为 (batch_size, channels, 1)
+            View((-1, channels, 1))   
         )
         return se_block
     
@@ -152,15 +152,15 @@ class SMFFDTA(nn.Module):
     def forward(self, drugSMI, drugFP, drugAtom, proteinSeq, proteinSSE, proteinPHYCHE):
 
 
-        drugEmbed = self.drug_embed(drugSMI)                ## [64, 100, 128]
-        atomEmbed = self.atom_embed(drugAtom)               ## [64, 100, 64]
+        drugEmbed = self.drug_embed(drugSMI)            
+        atomEmbed = self.atom_embed(drugAtom)               
         drugEmbed = drugEmbed.permute(0, 2, 1)
         drugfp = drugFP.to(torch.float)
         atomEmbed = atomEmbed.permute(0, 2, 1)
         
-        proteinEmbed = self.protein_embed(proteinSeq)       ## [64, 1200, 64]
-        sseEmbed = self.sse_embed(proteinSSE)               ## [64, 1200, 6]
-        phycheEmbed = self.phyche_embed(proteinPHYCHE)      ## [64, 1200, 15]
+        proteinEmbed = self.protein_embed(proteinSeq)     
+        sseEmbed = self.sse_embed(proteinSSE)               
+        phycheEmbed = self.phyche_embed(proteinPHYCHE)     
         proteinEmbed = proteinEmbed.permute(0, 2, 1)
         sseEmbed = sseEmbed.permute(0, 2, 1)
         phycheEmbed = phycheEmbed.permute(0, 2, 1)
@@ -169,17 +169,17 @@ class SMFFDTA(nn.Module):
         ## SE-Block
         drugSE = self.SE_drug(drugEmbed)
         drugCnn = drugSE*drugEmbed.expand_as(drugEmbed)
-        drugCnn = drugCnn + drugEmbed                       ## [64, 128, 100]
+        drugCnn = drugCnn + drugEmbed                      
         
         atomSE = self.SE_atom(atomEmbed)
         atomCnn = atomSE*atomEmbed.expand_as(atomEmbed)
-        atomCnn = atomCnn + atomEmbed                       ## [64, 64, 100]
+        atomCnn = atomCnn + atomEmbed                      
         # atomCnn = atomCnn.repeat(1, 1, 2)
         
         proteinAll = torch.concat([proteinEmbed, sseEmbed, phycheEmbed], dim=1)      
         proteinSE = self.SE_protein(proteinAll)
         proteinCnn = proteinSE*proteinAll.expand_as(proteinAll)
-        proteinCnn = proteinCnn + proteinAll                ## [64, 85, 1200]
+        proteinCnn = proteinCnn + proteinAll             
 
                 
         ## Drug-CNN 
@@ -187,13 +187,13 @@ class SMFFDTA(nn.Module):
         drugConv = drugConv.permute(0, 2, 1)
         drugGRU, _ = self.Drug_gru(drugConv)
         drugGRU = self.Drug_adaptPool(drugGRU)
-        drugGRU = drugGRU.permute(0, 2, 1)                  ## [64, 64, 85]
+        drugGRU = drugGRU.permute(0, 2, 1)               
         drugGRUSE = self.SE1(drugGRU)
         drug1 = drugGRUSE*drugGRU.expand_as(drugGRU)
         drug1 = drug1 + drugGRU
         ## Fingerprint-FC
         drugfp = self.fp_linear(drugfp)
-        drugfp = drugfp.unsqueeze(2).repeat(1, 1, 85)       ## [64, 64, 85]
+        drugfp = drugfp.unsqueeze(2).repeat(1, 1, 85)      
         drugfpSE = self.SE1(drugfp)
         drug2 = drugfpSE*drugfp.expand_as(drugfp)
         drug2 = drug2 + drugfp
@@ -202,7 +202,7 @@ class SMFFDTA(nn.Module):
         atomConv = atomConv.permute(0, 2, 1)
         atomGRU, _ = self.Atom_gru(atomConv)
         atomGRU = self.Atom_adaptPool(atomGRU)
-        atomGRU = atomGRU.permute(0, 2, 1)                  ## [64, 64, 85]
+        atomGRU = atomGRU.permute(0, 2, 1)                
         atomGRUSE = self.SE1(atomGRU)
         drug3 = atomGRUSE*atomGRU.expand_as(atomGRU)
         drug3 = drug3 + atomGRU
@@ -213,15 +213,15 @@ class SMFFDTA(nn.Module):
         proteinConv = proteinConv.permute(0, 2, 1)
         proteinGRU, _ = self.Protein_gru(proteinConv)
         proteinGRU = self.Protein_adaptPool(proteinGRU)
-        proteinGRU = proteinGRU.permute(0, 2, 1)            ## [64, 96, 1179]
+        proteinGRU = proteinGRU.permute(0, 2, 1)          
         proteinGRUSE = self.SE2(proteinGRU)
         protein = proteinGRUSE*proteinGRU.expand_as(proteinGRU)
         protein = protein + proteinGRU
 
         
         ## feature fusion
-        drugfuse = torch.cat([drug1, drug2, drug3], dim=1)      ## [64, 192, 85]  
-        proteinfuse = self.maxPool(protein)                     ## [64, 192, 589]   
+        drugfuse = torch.cat([drug1, drug2, drug3], dim=1)      
+        proteinfuse = self.maxPool(protein)                      
 
         drugSE2 = self.SE2(drugfuse)
         drug_mul = drugSE2*drugfuse.expand_as(drugfuse)
