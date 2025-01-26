@@ -71,7 +71,7 @@ def get_kfold_data(i, datasets, k=5):
         validset = datasets[val_start:val_end]
         trainset = datasets[val_end:]
     else:
-        validset = datasets[val_start:] # 若不能整除，将多的case放在最后一折里
+        validset = datasets[val_start:] 
         trainset = datasets[0:val_start]
 
     return trainset, validset
@@ -103,7 +103,7 @@ if __name__ == "__main__":
     DATASET = "Davis"
     # DATASET = "KIBA"
     print("Train in {}".format(DATASET))
-    tst_path = f'/home/2023/23xzj/SMFF-DTA/Dataset/{DATASET}/{DATASET}.txt'
+    tst_path = f'../SMFF-DTA/Dataset/{DATASET}/{DATASET}.txt'
     
     with open(tst_path, 'r') as f:
         cpi_list = f.read().strip().split('\n')
@@ -139,7 +139,7 @@ if __name__ == "__main__":
     f_model.close()
 
     for i_fold in range(K_Fold):
-        print('*' * 25, '第', i_fold + 1, '折', '*' * 25)
+        print('*' * 25, 'fold', i_fold + 1, '*' * 25)
         trainset, testset = get_kfold_data(i_fold, dataset, k=K_Fold)
         TVdataset = CustomDataSet(trainset)
         test_dataset = CustomDataSet(testset)
@@ -184,7 +184,6 @@ if __name__ == "__main__":
         start = timeit.default_timer()
         patience = 0
         best_score = 100
-        # best_score = 0
         for epoch in range(1, Epoch + 1):
             train_pbar = tqdm(
                 enumerate(
@@ -247,7 +246,7 @@ if __name__ == "__main__":
             valid_MAE = mean_absolute_error(Y, P)
             valid_Rm2 = get_rm2(Y, P)
             valid_c_index = get_cindex(Y, P)
-            valid_loss_a_epoch = np.average(valid_losses_in_epoch)  # 一次epoch的平均验证loss
+            valid_loss_a_epoch = np.average(valid_losses_in_epoch)  
 
             if valid_MSE < best_score:
                 best_score = valid_MSE
