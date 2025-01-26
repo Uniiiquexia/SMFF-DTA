@@ -2,15 +2,15 @@ import numpy as np
 import re
 from rdkit import Chem
 
-atomic_num_list = [1, 6, 7, 8, 9, 15, 16, 17, 35, 53]   # 常见的原子序数
-degree_list = [0, 1, 2, 3, 4, 5]                        # 键的数目
-num_Hs_list = [0, 1, 2, 3, 4]                           # 氢原子数目
-implicit_valence_list = [0, 1, 2, 3, 4, 5]              # 隐式价电子数
-formal_charge_list = [-1, 0, 1]                         # 形式电荷
-is_aromatic_list = [0, 1]                               # 是否芳香族
+atomic_num_list = [1, 6, 7, 8, 9, 15, 16, 17, 35, 53]   
+degree_list = [0, 1, 2, 3, 4, 5]                        
+num_Hs_list = [0, 1, 2, 3, 4]                          
+implicit_valence_list = [0, 1, 2, 3, 4, 5]            
+formal_charge_list = [-1, 0, 1]                        
+is_aromatic_list = [0, 1]                             
 hybridization_list = [Chem.rdchem.HybridizationType.S, Chem.rdchem.HybridizationType.SP, 
                       Chem.rdchem.HybridizationType.SP2, Chem.rdchem.HybridizationType.SP3, 
-                      Chem.rdchem.HybridizationType.SP3D, Chem.rdchem.HybridizationType.SP3D2]  # 杂化状态
+                      Chem.rdchem.HybridizationType.SP3D, Chem.rdchem.HybridizationType.SP3D2]  
 
 
 
@@ -23,13 +23,13 @@ def get_one_hot(value, category_list):
 
 def get_atom_features(atom):
     features = []
-    features.extend(get_one_hot(atom.GetAtomicNum(), atomic_num_list))  # 原子序数
-    features.extend(get_one_hot(atom.GetDegree(), degree_list))  # 键的数目
-    features.extend(get_one_hot(atom.GetTotalNumHs(), num_Hs_list))  # 氢原子数目
-    features.extend(get_one_hot(atom.GetImplicitValence(), implicit_valence_list))  # 隐式价电子数
-    features.extend(get_one_hot(atom.GetFormalCharge(), formal_charge_list))  # 形式电荷
-    features.extend(get_one_hot(int(atom.GetIsAromatic()), is_aromatic_list))  # 是否芳香族
-    features.extend(get_one_hot(atom.GetHybridization().real, hybridization_list))  # 杂化状态
+    features.extend(get_one_hot(atom.GetAtomicNum(), atomic_num_list)) 
+    features.extend(get_one_hot(atom.GetDegree(), degree_list)) 
+    features.extend(get_one_hot(atom.GetTotalNumHs(), num_Hs_list))  
+    features.extend(get_one_hot(atom.GetImplicitValence(), implicit_valence_list)) 
+    features.extend(get_one_hot(atom.GetFormalCharge(), formal_charge_list)) 
+    features.extend(get_one_hot(int(atom.GetIsAromatic()), is_aromatic_list))  
+    features.extend(get_one_hot(atom.GetHybridization().real, hybridization_list)) 
     return features
 
 
@@ -120,7 +120,7 @@ with open(out, 'r') as f:
             first_column = columns[0]
             second_column = columns[1]
             if first_column in keys:
-                file_path = f'/home/2023/23xzj/SMFF-DTA/Dataset/{dataset}/atomfeature/{first_column}.npy'
+                file_path = f'../SMFF-DTA/Dataset/{dataset}/atomfeature/{first_column}.npy'
                 atom = atomFeatures(second_column)
                 np.save(file_path, atom)
 
