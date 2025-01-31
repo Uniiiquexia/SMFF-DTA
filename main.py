@@ -116,7 +116,7 @@ if __name__ == "__main__":
     Batch_size = 32 
     weight_decay = 1e-4 
     Learning_rate = 5e-6
-    Patience = 50    
+    Patience = 20    
     Epoch = 300     
     """Output files."""
     save_path = "../SMFF-DTA/Results/{}/".format(DATASET)
@@ -273,8 +273,8 @@ if __name__ == "__main__":
         torch.save(model.state_dict(), save_path_i + 'stable_checkpoint.pth')
         """load trained model"""
         model.load_state_dict(torch.load(save_path_i + "valid_best_checkpoint.pth"))
-        trainset_test_results,_,_,_,_,_ = test_model(train_dataset_load, save_path_i, DATASET, lable="Train")
-        validset_test_results,_,_,_,_,_ = test_model(valid_dataset_load, save_path_i, DATASET, lable="Valid")
+        trainset_test_results,_,_,_,_ = test_model(train_dataset_load, save_path_i, DATASET, lable="Train")
+        validset_test_results,_,_,_,_ = test_model(valid_dataset_load, save_path_i, DATASET, lable="Valid")
         testset_test_results,mse_test, mae_test, rm2_test, c_index_test = test_model(test_dataset_load,save_path_i,DATASET,lable="Test")
         
         with open(save_path + "The_results.txt", 'a') as f:
